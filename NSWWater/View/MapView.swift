@@ -21,9 +21,8 @@ struct MapView: View {
 
     var body: some View {
         Map(position: $camera) {
-            // Optional pins for dams (from stub data or API later).
             ForEach(vm.dams) { dam in
-                Marker(dam.name, coordinate: dam.coordinate)
+                Marker(dam.name, coordinate: CLLocationCoordinate2D(latitude: dam.latitude, longitude: dam.longitude))
             }
         }
         .ignoresSafeArea()

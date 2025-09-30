@@ -10,7 +10,7 @@ struct Dam: Identifiable, Decodable {
     let name: String
     let latitude: Double
     let longitude: Double
-    let fullVolume: Int
+    let fullVolume: Int?
 
     enum CodingKeys: String, CodingKey {
         case id         = "dam_id"
