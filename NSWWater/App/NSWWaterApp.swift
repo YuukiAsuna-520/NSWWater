@@ -9,9 +9,12 @@ import SwiftUI
 
 @main
 struct NSWWaterApp: App {
+    @StateObject private var vm = DamListViewModel()
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            DamListView()
+                .environmentObject(vm)
         }
     }
 }
