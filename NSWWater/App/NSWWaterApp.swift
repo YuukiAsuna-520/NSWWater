@@ -13,8 +13,7 @@ struct NSWWaterApp: App {
 
     var body: some Scene {
         WindowGroup {
-            DamListView()
-                .environmentObject(vm)
+            ContentView().environmentObject(vm)
         }
     }
 }
