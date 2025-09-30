@@ -120,8 +120,3 @@ struct DamDetailView: View {
     }
 }
 
-#Preview {
-    DamDetailView()
-        .environmentObject(DamListViewModel())
-        .environmentObject(FavoritesStore())
-}
