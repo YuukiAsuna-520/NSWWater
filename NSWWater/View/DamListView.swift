@@ -8,33 +8,59 @@
 import SwiftUI
 
 struct DamListView: View {
-    @EnvironmentObject var vm: DamListViewModel
-    // Read the shared VM from the environment.
+    @EnvironmentObject var vm: DamListViewModel        // Read shared VM from environment
+
+    @State private var showError = false               // Drive alert presentation
 
     var body: some View {
         NavigationStack {
-            List(vm.filtered) { dam in
-                NavigationLink(destination: DamDetailView(dam: dam)) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(dam.name)
-                            .font(.headline) // Dam name
+            List {
+                ForEach(vm.filtered) { dam in
+                    NavigationLink {
+                        DamDetailView(dam: dam)
+                    } label: {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(dam.name)
+                                .font(.headline)      // Dam name
 
-                        // Show coordinates
-                        Text(String(format: "Lat %.4f, Lon %.4f", dam.latitude, dam.longitude))
-                            .font(.footnote)
-                            .foregroundStyle(.secondary)
+                            Text(String(format: "Lat %.4f, Lon %.4f",
+                                         dam.latitude, dam.longitude))
+                                .font(.footnote)
+                                .foregroundStyle(.secondary)  // Coordinates
+                        }
                     }
                 }
             }
             .navigationTitle("Dams")
-            .searchable(text: $vm.searchText, prompt: "Search by name")
-            // Kick off the first network load when the list appears.
-            .task {
-                await vm.loadFromNetworkReplacingStub()
+            .searchable(text: $vm.searchText, prompt: "Search by name or id")
+            // Load once when view first appears (avoids duplicate loads when switching tabs)
+            .task { await vm.ensureLoadedOnce() }
+
+            // Pull to refresh
+            .refreshable { await vm.refresh() }
+
+            // Loading spinner & empty state overlay
+            .overlay {
+                if vm.isLoading {
+                    ProgressView()
+                        .controlSize(.large)
+                } else if vm.filtered.isEmpty {
+                    ContentUnavailableView(
+                        "No results",
+                        systemImage: "magnifyingglass",
+                        description: Text("Try a different keyword.")
+                    )
+                }
             }
-            // Pull-to-refresh to re-fetch from the API.
-            .refreshable {
-                await vm.loadFromNetworkReplacingStub()
+
+            // Show alert when lastError changes to non-nil
+            .onChange(of: vm.lastError) { _, newValue in
+                showError = (newValue != nil)
+            }
+            .alert("Network Error", isPresented: $showError, presenting: vm.lastError) { _ in
+                Button("OK", role: .cancel) {}
+            } message: { err in
+                Text(err)
             }
         }
     }
