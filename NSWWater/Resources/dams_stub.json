@@ -1,4 +1,4 @@
 [
-  { "id": "WARRAGAMBA", "name": "Warragamba Dam", "latitude": -33.875, "longitude": 150.602, "region": "Sydney",   "storagePercent": 83.2 },
-  { "id": "AVON",        "name": "Avon Dam",       "latitude": -34.296, "longitude": 150.623, "region": "Illawarra", "storagePercent": 76.5 }
+  { "id": "WARRAGAMBA", "name": "Warragamba Dam", "latitude": -33.875, "longitude": 150.602, "storagePercent": 83.2 },
+  { "id": "AVON",        "name": "Avon Dam",        "latitude": -34.296, "longitude": 150.623, "storagePercent": 76.5 }
 ]
