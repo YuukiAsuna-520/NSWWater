@@ -26,6 +26,7 @@ struct MapView: View {
             }
         }
         .ignoresSafeArea()
+        .task { await vm.ensureLoadedOnce() }
     }
 }
 
