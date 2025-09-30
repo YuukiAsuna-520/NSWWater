@@ -10,10 +10,13 @@ import SwiftUI
 @main
 struct NSWWaterApp: App {
     @StateObject private var vm = DamListViewModel()
+    @StateObject private var favs = FavoritesStore()
 
     var body: some Scene {
         WindowGroup {
-            ContentView().environmentObject(vm)
+            ContentView()
+                .environmentObject(vm)
+                .environmentObject(favs)
         }
     }
 }

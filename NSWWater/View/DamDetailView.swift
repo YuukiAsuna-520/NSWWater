@@ -10,47 +10,86 @@ import MapKit
 
 struct DamDetailView: View {
     let dam: Dam
-    @EnvironmentObject var vm: DamListViewModel   // read view model
+    @EnvironmentObject var vm: DamListViewModel
+
+    @State private var isFetching = false
+
+    private var latest: DamResource? { vm.latestByDam[dam.id] }
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 12) {
+                // Title
                 Text(dam.name)
-                    .font(.title)
-                    .bold()
+                    .font(.title).bold()
 
                 // Coordinates
-                Label(String(format: "Lat %.4f, Lon %.4f", dam.latitude, dam.longitude),
-                      systemImage: "location")
-
-                // Full volume (from list model)
-                if let volume = dam.fullVolume {
-                    Label("Full volume: \(volume) ML", systemImage: "drop.triangle")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                Label {
+                    Text(String(format: "Lat %.4f, Lon %.4f", dam.latitude, dam.longitude))
+                } icon: {
+                    Image(systemName: "location")
                 }
 
-                // --- Latest monthly resource (from API) ---
-                if let r = vm.latestByDam[dam.id] {
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("Latest (month)").font(.headline)
-                        Text("Date: \(format(date: r.date))")
-                        Text(String(format: "Percent full: %.1f%%", r.percentFull))
-                        Text(String(format: "Inflow: %.0f ML", r.inflow))
-                        Text(String(format: "Release: %.0f ML", r.release))
-                        Text(String(format: "Volume: %.0f ML", r.volume))
+                // Design capacity (from Dam)
+                if let volume = dam.fullVolume {
+                    Label {
+                        Text("Full volume: \(volume) ML")
+                    } icon: {
+                        Image(systemName: "drop.triangle")
+                    }
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                }
+
+                // Latest metrics (NO date)
+                if let r = latest {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Latest").font(.headline)
+
+                        if let p = r.percentFull {
+                            Label {
+                                Text(String(format: "Storage: %.1f%%", p))
+                            } icon: {
+                                Image(systemName: "gauge.with.dots.needle.bottom.50percent")
+                            }
+                            .foregroundStyle(.secondary)
+                        }
+
+                        if let v = r.volume {
+                            Label {
+                                Text(String(format: "Current volume: %.0f ML", v))
+                            } icon: {
+                                Image(systemName: "drop.fill")
+                            }
+                            .foregroundStyle(.secondary)
+                        }
+
+                        if let i = r.inflow {
+                            Label {
+                                Text(String(format: "Inflow: %.0f ML", i))
+                            } icon: {
+                                Image(systemName: "arrow.down")
+                            }
+                            .foregroundStyle(.secondary)
+                        }
+
+                        if let o = r.release {
+                            Label {
+                                Text(String(format: "Release: %.0f ML", o))
+                            } icon: {
+                                Image(systemName: "arrow.up")
+                            }
+                            .foregroundStyle(.secondary)
+                        }
                     }
                     .padding()
                     .background(.thinMaterial)
                     .clipShape(RoundedRectangle(cornerRadius: 10))
                 } else {
-                    Text(BuildFlags.useNetwork
-                         ? "Fetching latest..."
-                         : "Using stub data (latest not fetched).")
+                    Text(isFetching ? "Loading latest…" : "Latest data unavailable.")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }
-                // --- end latest ---
 
                 // Map
                 Map(initialPosition: .region(
@@ -68,25 +107,15 @@ struct DamDetailView: View {
         }
         .navigationTitle("Dam Details")
         .navigationBarTitleDisplayMode(.inline)
-        .task { await vm.loadLatest(for: dam) }  // fetch latest on appear
+        .task { await fetchLatest() }
+        .refreshable { await fetchLatest() }
     }
 
-    private func format(date: Date) -> String {
-        let df = DateFormatter()
-        df.dateStyle = .medium
-        return df.string(from: date)
-    }
-}
+    // MARK: - Helpers
 
-#Preview {
-    DamDetailView(
-        dam: Dam(
-            id: "WARRAGAMBA",
-            name: "Warragamba Dam",
-            latitude: -33.875,
-            longitude: 150.602,
-            fullVolume: 35800
-        )
-    )
-    .environmentObject(DamListViewModel())
+    private func fetchLatest() async {
+        isFetching = true
+        await vm.loadLatest(for: dam)
+        isFetching = false
+    }
 }

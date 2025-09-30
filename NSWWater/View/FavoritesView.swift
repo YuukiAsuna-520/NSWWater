@@ -8,16 +8,33 @@
 import SwiftUI
 
 struct FavoritesView: View {
-    var body: some View {
-        VStack(spacing: 12) {
-            Text("Favorites").font(.title2).bold()
-            Text("Saved dams will appear here (Core Data).")
-                .foregroundStyle(.secondary)
-        }
-        .padding()
-    }
-}
+    @EnvironmentObject var vm: DamListViewModel
+    @EnvironmentObject var favs: FavoritesStore
 
-#Preview {
-    FavoritesView()
+    var body: some View {
+        NavigationStack {
+            if favs.ids.isEmpty {
+                ContentUnavailableView(
+                    "No favorites",
+                    systemImage: "star",
+                    description: Text("Swipe a dam in the list to add it here.")
+                )
+                .navigationTitle("Favorites")
+            } else {
+                List(favs.all(in: vm.dams)) { dam in
+                    NavigationLink(destination: DamDetailView(dam: dam)) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(dam.name).font(.headline)
+                            Text(String(format: "Lat %.4f, Lon %.4f", dam.latitude, dam.longitude))
+                                .font(.footnote).foregroundStyle(.secondary)
+                        }
+                    }
+                }
+                .navigationTitle("Favorites")
+                .toolbar {
+                    Button("Clear") { favs.clear() }
+                }
+            }
+        }
+    }
 }

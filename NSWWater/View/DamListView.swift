@@ -8,9 +8,10 @@
 import SwiftUI
 
 struct DamListView: View {
-    @EnvironmentObject var vm: DamListViewModel        // Read shared VM from environment
+    @EnvironmentObject var vm: DamListViewModel        // shared VM
+    @EnvironmentObject var favs: FavoritesStore        // favorites
 
-    @State private var showError = false               // Drive alert presentation
+    @State private var showError = false               // drive alert
 
     var body: some View {
         NavigationStack {
@@ -19,31 +20,49 @@ struct DamListView: View {
                     NavigationLink {
                         DamDetailView(dam: dam)
                     } label: {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(dam.name)
-                                .font(.headline)      // Dam name
+                        HStack {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(dam.name)
+                                    .font(.headline)
 
-                            Text(String(format: "Lat %.4f, Lon %.4f",
-                                         dam.latitude, dam.longitude))
-                                .font(.footnote)
-                                .foregroundStyle(.secondary)  // Coordinates
+                                Text(String(format: "Lat %.4f, Lon %.4f",
+                                            dam.latitude, dam.longitude))
+                                    .font(.footnote)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            if favs.isFav(dam.id) {
+                                Image(systemName: "star.fill")
+                                    .foregroundStyle(.yellow)
+                                    .accessibilityLabel("Favorited")
+                            }
                         }
+                    }
+                    // swipe to (un)favorite
+                    .swipeActions(edge: .trailing) {
+                        Button {
+                            favs.toggle(dam.id)
+                        } label: {
+                            Label(favs.isFav(dam.id) ? "Unfavorite" : "Favorite",
+                                  systemImage: favs.isFav(dam.id) ? "star.slash" : "star")
+                        }
+                        .tint(.yellow)
                     }
                 }
             }
             .navigationTitle("Dams")
             .searchable(text: $vm.searchText, prompt: "Search by name or id")
-            // Load once when view first appears (avoids duplicate loads when switching tabs)
+
+            // load once on first appear
             .task { await vm.ensureLoadedOnce() }
 
-            // Pull to refresh
+            // pull to refresh
             .refreshable { await vm.refresh() }
 
-            // Loading spinner & empty state overlay
+            // loading & empty overlays
             .overlay {
                 if vm.isLoading {
-                    ProgressView()
-                        .controlSize(.large)
+                    ProgressView().controlSize(.large)
                 } else if vm.filtered.isEmpty {
                     ContentUnavailableView(
                         "No results",
@@ -53,7 +72,7 @@ struct DamListView: View {
                 }
             }
 
-            // Show alert when lastError changes to non-nil
+            // error alert
             .onChange(of: vm.lastError) { _, newValue in
                 showError = (newValue != nil)
             }
@@ -67,5 +86,7 @@ struct DamListView: View {
 }
 
 #Preview {
-    DamListView().environmentObject(DamListViewModel())
+    DamListView()
+        .environmentObject(DamListViewModel())
+        .environmentObject(FavoritesStore())
 }
