@@ -9,26 +9,33 @@ import SwiftUI
 
 struct DamListView: View {
     @EnvironmentObject var vm: DamListViewModel
-    // Read the shared view model from the environment.
+    // Read the shared VM from the environment.
 
     var body: some View {
         NavigationStack {
             List(vm.filtered) { dam in
                 NavigationLink(destination: DamDetailView(dam: dam)) {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text(dam.name).font(.headline)                    // Name
-                        Text(dam.region ?? "NSW")
-                            .font(.subheadline).foregroundStyle(.secondary) // Region
-                        if let p = dam.storagePercent {
-                            Text(String(format: "Storage: %.1f%%", p))
-                                .font(.caption).foregroundStyle(.secondary) // Storage
-                        }
+                        Text(dam.name)
+                            .font(.headline) // Dam name
+
+                        // Show coordinates
+                        Text(String(format: "Lat %.4f, Lon %.4f", dam.latitude, dam.longitude))
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
                     }
                 }
             }
-            .navigationTitle("Dams")    // View Title
-            .searchable(text: $vm.searchText, prompt: "Search by name or region")
-            // Bind search bar to the view model's searchText.
+            .navigationTitle("Dams")
+            .searchable(text: $vm.searchText, prompt: "Search by name")
+            // Kick off the first network load when the list appears.
+            .task {
+                await vm.loadFromNetworkReplacingStub()
+            }
+            // Pull-to-refresh to re-fetch from the API.
+            .refreshable {
+                await vm.loadFromNetworkReplacingStub()
+            }
         }
     }
 }
@@ -36,4 +43,3 @@ struct DamListView: View {
 #Preview {
     DamListView().environmentObject(DamListViewModel())
 }
-
