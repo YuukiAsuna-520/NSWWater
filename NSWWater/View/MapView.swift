@@ -6,18 +6,30 @@
 //
 
 import SwiftUI
+import MapKit
 
 struct MapView: View {
+    @EnvironmentObject var vm: DamListViewModel
+    
+    // Static region centered on Sydney.
+    @State private var camera: MapCameraPosition = .region(
+        MKCoordinateRegion(
+            center: CLLocationCoordinate2D(latitude: -33.8688, longitude: 151.2093),
+            span: MKCoordinateSpan(latitudeDelta: 0.3, longitudeDelta: 0.3)
+        )
+    )
+
     var body: some View {
-        VStack(spacing: 12) {
-            Text("Map View").font(.title2).bold()
-            Text("This will be replaced with a real MapKit map.")
-                .foregroundStyle(.secondary)
+        Map(position: $camera) {
+            // Optional pins for dams (from stub data or API later).
+            ForEach(vm.dams) { dam in
+                Marker(dam.name, coordinate: dam.coordinate)
+            }
         }
-        .padding()
+        .ignoresSafeArea()
     }
 }
 
 #Preview {
-    MapView()
+    MapView().environmentObject(DamListViewModel())
 }
