@@ -14,6 +14,9 @@ final class DamListViewModel: ObservableObject {
 
     @Published var dams: [Dam] = StubLoader.loadDams()
     @Published var searchText: String = ""
+    // Cache latest resource per dam id.
+    @Published var latestByDam: [String: DamResource] = [:]
+
 
     var filtered: [Dam] {
         // Search by name or id only
@@ -136,6 +139,25 @@ final class DamListViewModel: ObservableObject {
         hasLoadedOnce = true
         await loadFromNetworkReplacingStub()
     }
+    
+    @MainActor
+    func loadLatest(for dam: Dam) async {
+        // Respect BuildFlags: if using stub, skip network.
+        guard BuildFlags.useNetwork else { return }
+
+        let hasAnyAuth = (!AUTH_BASIC.isEmpty) || (!API_KEY.isEmpty)
+        guard hasAnyAuth else { return }
+
+        do {
+            // GET /dams/{id}/resources/latest
+            let path = "dams/\(dam.id)/resources/latest"
+            let res: DamResource = try await GET(path)
+            latestByDam[dam.id] = res
+        } catch {
+            print("loadLatest failed for \(dam.id): \(error)")
+        }
+    }
+
 }
 
 // MARK: - Networking and "DTO"
