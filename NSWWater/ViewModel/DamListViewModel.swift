@@ -96,6 +96,12 @@ final class DamListViewModel: ObservableObject {
 
     @MainActor
     func loadFromNetworkReplacingStub() async {
+        
+        guard BuildFlags.useNetwork else {
+                print("BuildFlags.useNetwork=false → keep stub dams (\(dams.count))")
+                return
+            }
+        
         let hasAnyAuth = (!AUTH_BASIC.isEmpty) || (!API_KEY.isEmpty)
         guard hasAnyAuth else {
             print("API auth not configured; keep stub dams.")
