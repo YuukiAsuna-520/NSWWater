@@ -38,3 +38,9 @@ struct FavoritesView: View {
         }
     }
 }
+
+#Preview {
+    FavoritesView()
+        .environmentObject(DamListViewModel())
+        .environmentObject(FavoritesStore())
+}

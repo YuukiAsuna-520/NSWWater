@@ -31,5 +31,7 @@ struct MapView: View {
 }
 
 #Preview {
-    MapView().environmentObject(DamListViewModel())
+    MapView()
+        .environmentObject(DamListViewModel())
+        .environmentObject(FavoritesStore())
 }

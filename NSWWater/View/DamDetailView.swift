@@ -119,3 +119,9 @@ struct DamDetailView: View {
         isFetching = false
     }
 }
+
+#Preview {
+    DamDetailView()
+        .environmentObject(DamListViewModel())
+        .environmentObject(FavoritesStore())
+}

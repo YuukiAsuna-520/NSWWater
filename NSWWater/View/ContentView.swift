@@ -27,4 +27,6 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
+        .environmentObject(DamListViewModel())
+        .environmentObject(FavoritesStore())
 }
