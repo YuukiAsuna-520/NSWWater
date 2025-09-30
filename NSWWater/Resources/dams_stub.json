@@ -1,4 +1,4 @@
 [
-  { "id": "WARRAGAMBA", "name": "Warragamba Dam", "latitude": -33.875, "longitude": 150.602, "storagePercent": 83.2 },
-  { "id": "AVON",        "name": "Avon Dam",        "latitude": -34.296, "longitude": 150.623, "storagePercent": 76.5 }
+  { "dam_id": "WARRAGAMBA", "dam_name": "Warragamba Dam", "lat": -33.875, "long": 150.602, "percent_full": 83.2 },
+  { "dam_id": "AVON",        "dam_name": "Avon Dam",       "lat": -34.296, "long": 150.623, "percent_full": 76.5 }
 ]

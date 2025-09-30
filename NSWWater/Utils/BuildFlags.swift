@@ -8,6 +8,6 @@
 import Foundation
 
 enum BuildFlags {
-    // test；change to "true" until using API
+    // Toggle to use live API; keep `false` for stub/offline.
     static let useNetwork = false
 }
