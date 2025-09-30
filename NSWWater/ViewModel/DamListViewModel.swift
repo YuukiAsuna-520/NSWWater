@@ -37,6 +37,8 @@ final class DamListViewModel: ObservableObject {
     private let OAUTH_TOKEN_URL = "https://api.onegov.nsw.gov.au/oauth/client_credential/accesstoken?grant_type=client_credentials"
     
     private let AUTH_BASIC: String = ""
+    private let API_KEY_HEADER = "apikey"
+    private let API_KEY = ""
 
     // Cached OAuth token
     private var oauthToken: String?
@@ -71,6 +73,12 @@ final class DamListViewModel: ObservableObject {
         var req = URLRequest(url: try makeURL(path, query: query))
         req.httpMethod = "GET"
         req.setValue("application/json", forHTTPHeaderField: "Accept")
+        
+        // Subscription key header (API Key)
+        if !API_KEY.isEmpty {
+                req.setValue(API_KEY, forHTTPHeaderField: API_KEY_HEADER)
+            }
+        
         if let token = oauthToken, !token.isEmpty {
             req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         }
