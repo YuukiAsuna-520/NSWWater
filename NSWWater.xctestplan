@@ -1,0 +1,30 @@
+{
+  "configurations" : [
+    {
+      "id" : "EC057287-CAAF-4983-863D-841BC0E81AC3",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "performanceAntipatternCheckerEnabled" : true,
+    "targetForVariableExpansion" : {
+      "containerPath" : "container:NSWWater.xcodeproj",
+      "identifier" : "A3D61BD62E891F5F00834943",
+      "name" : "NSWWater"
+    }
+  },
+  "testTargets" : [
+    {
+      "parallelizable" : true,
+      "target" : {
+        "containerPath" : "container:NSWWater.xcodeproj",
+        "identifier" : "A3D61BE32E891F6000834943",
+        "name" : "NSWWaterTests"
+      }
+    }
+  ],
+  "version" : 1
+}

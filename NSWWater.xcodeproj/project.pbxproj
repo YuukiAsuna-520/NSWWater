@@ -18,19 +18,11 @@
 			remoteGlobalIDString = A3D61BD62E891F5F00834943;
 			remoteInfo = NSWWater;
 		};
-		A3D61BEF2E891F6000834943 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = A3D61BCF2E891F5F00834943 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = A3D61BD62E891F5F00834943;
-			remoteInfo = NSWWater;
-		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		A3D61BD72E891F5F00834943 /* NSWWater.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NSWWater.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A3D61BE42E891F6000834943 /* NSWWaterTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NSWWaterTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		A3D61BEE2E891F6000834943 /* NSWWaterUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NSWWaterUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -42,11 +34,6 @@
 		A3D61BE72E891F6000834943 /* NSWWaterTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = NSWWaterTests;
-			sourceTree = "<group>";
-		};
-		A3D61BF12E891F6000834943 /* NSWWaterUITests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = NSWWaterUITests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -67,13 +54,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		A3D61BEB2E891F6000834943 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -82,7 +62,6 @@
 			children = (
 				A3D61BD92E891F5F00834943 /* NSWWater */,
 				A3D61BE72E891F6000834943 /* NSWWaterTests */,
-				A3D61BF12E891F6000834943 /* NSWWaterUITests */,
 				A3D61BD82E891F5F00834943 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -92,7 +71,6 @@
 			children = (
 				A3D61BD72E891F5F00834943 /* NSWWater.app */,
 				A3D61BE42E891F6000834943 /* NSWWaterTests.xctest */,
-				A3D61BEE2E891F6000834943 /* NSWWaterUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -146,29 +124,6 @@
 			productReference = A3D61BE42E891F6000834943 /* NSWWaterTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		A3D61BED2E891F6000834943 /* NSWWaterUITests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = A3D61BFE2E891F6000834943 /* Build configuration list for PBXNativeTarget "NSWWaterUITests" */;
-			buildPhases = (
-				A3D61BEA2E891F6000834943 /* Sources */,
-				A3D61BEB2E891F6000834943 /* Frameworks */,
-				A3D61BEC2E891F6000834943 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				A3D61BF02E891F6000834943 /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				A3D61BF12E891F6000834943 /* NSWWaterUITests */,
-			);
-			name = NSWWaterUITests;
-			packageProductDependencies = (
-			);
-			productName = NSWWaterUITests;
-			productReference = A3D61BEE2E891F6000834943 /* NSWWaterUITests.xctest */;
-			productType = "com.apple.product-type.bundle.ui-testing";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -183,10 +138,6 @@
 						CreatedOnToolsVersion = 26.0.1;
 					};
 					A3D61BE32E891F6000834943 = {
-						CreatedOnToolsVersion = 26.0.1;
-						TestTargetID = A3D61BD62E891F5F00834943;
-					};
-					A3D61BED2E891F6000834943 = {
 						CreatedOnToolsVersion = 26.0.1;
 						TestTargetID = A3D61BD62E891F5F00834943;
 					};
@@ -211,7 +162,6 @@
 			targets = (
 				A3D61BD62E891F5F00834943 /* NSWWater */,
 				A3D61BE32E891F6000834943 /* NSWWaterTests */,
-				A3D61BED2E891F6000834943 /* NSWWaterUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -225,13 +175,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		A3D61BE22E891F6000834943 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		A3D61BEC2E891F6000834943 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -255,13 +198,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		A3D61BEA2E891F6000834943 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -269,11 +205,6 @@
 			isa = PBXTargetDependency;
 			target = A3D61BD62E891F5F00834943 /* NSWWater */;
 			targetProxy = A3D61BE52E891F6000834943 /* PBXContainerItemProxy */;
-		};
-		A3D61BF02E891F6000834943 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = A3D61BD62E891F5F00834943 /* NSWWater */;
-			targetProxy = A3D61BEF2E891F6000834943 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -507,46 +438,6 @@
 			};
 			name = Release;
 		};
-		A3D61BFF2E891F6000834943 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = CPTVLP6QXB;
-				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.Tingxuan.Zhang.NSWWaterUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				STRING_CATALOG_GENERATE_SYMBOLS = NO;
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = NSWWater;
-			};
-			name = Debug;
-		};
-		A3D61C002E891F6000834943 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = CPTVLP6QXB;
-				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.Tingxuan.Zhang.NSWWaterUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				STRING_CATALOG_GENERATE_SYMBOLS = NO;
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = NSWWater;
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -573,15 +464,6 @@
 			buildConfigurations = (
 				A3D61BFC2E891F6000834943 /* Debug */,
 				A3D61BFD2E891F6000834943 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		A3D61BFE2E891F6000834943 /* Build configuration list for PBXNativeTarget "NSWWaterUITests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				A3D61BFF2E891F6000834943 /* Debug */,
-				A3D61C002E891F6000834943 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
