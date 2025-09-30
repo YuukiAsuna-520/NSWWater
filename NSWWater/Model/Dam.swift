@@ -5,18 +5,19 @@
 //  Created by 黑白熊 on 28/9/2025.
 //
 
-import Foundation
-import CoreLocation
-
-struct Dam: Identifiable, Codable, Equatable {
+struct Dam: Identifiable, Decodable {
     let id: String
     let name: String
     let latitude: Double
     let longitude: Double
-    let region: String?
-    let storagePercent: Double?   // set firstly，will be used in /latest
+    let fullVolume: Int
 
-    var coordinate: CLLocationCoordinate2D {
-        .init(latitude: latitude, longitude: longitude)
+    enum CodingKeys: String, CodingKey {
+        case id         = "dam_id"
+        case name       = "dam_name"
+        case latitude   = "lat"
+        case longitude  = "long"
+        case fullVolume = "full_volume"
     }
 }
+

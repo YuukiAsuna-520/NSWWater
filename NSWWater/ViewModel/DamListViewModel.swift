@@ -25,11 +25,7 @@ final class DamListViewModel: ObservableObject {
         // Else
         return dams.filter { dam in
             let nameMatch = dam.name.localizedCaseInsensitiveContains(searchText)
-            
-            let regionText = dam.region ?? ""  // If dam.region is nil，replaced by ""
-            let regionMatch = regionText.localizedCaseInsensitiveContains(searchText)
-            
-            return nameMatch || regionMatch     // Either nameMatch or regionMatch
+            return nameMatch
         }
     }
     
@@ -94,8 +90,8 @@ final class DamListViewModel: ObservableObject {
             return
         }
         do {
-            let dtos: [DamDTO] = try await GET("dams") // => GET https://api.onegov.nsw.gov.au/waternsw-waterinsights/v1/dams
-            let items = dtos.compactMap { $0.toModel() }
+            let envelope: DamsEnvelope = try await GET("dams")
+            let items = envelope.dams
             if !items.isEmpty { self.dams = items }
         } catch {
             print("Fetch dams failed:", (error as? LocalizedError)?.errorDescription ?? "\(error)")
@@ -103,7 +99,7 @@ final class DamListViewModel: ObservableObject {
     }
 }
 
-// MARK: - DTO
+// MARK: - Networking and "DTO"
 
 // Token response for OAuth step.
 private struct AccessTokenResponse: Decodable {
@@ -123,35 +119,6 @@ private enum NetError: LocalizedError {
     }
 }
 
-// Dam DTO with tolerant keys.
-private struct DamDTO: Decodable {
-    let id: String?, name: String?, latitude: Double?, longitude: Double?, region: String?
-    enum CodingKeys: String, CodingKey { case id, name, latitude, longitude, region, dam_id, dam_name, lat, lon }
-    init(from d: Decoder) throws {
-        let c = try d.container(keyedBy: CodingKeys.self)
-        id        = try c.decodeIfPresent(String.self,  forKeys: [.id, .dam_id])
-        name      = try c.decodeIfPresent(String.self,  forKeys: [.name, .dam_name])
-        latitude  = try c.decodeIfPresent(Double.self,  forKeys: [.latitude, .lat])
-        longitude = try c.decodeIfPresent(Double.self,  forKeys: [.longitude, .lon])
-        region    = try c.decodeIfPresent(String.self,  forKeys: [.region])
-    }
-}
-private extension KeyedDecodingContainer {
-    func decodeIfPresent(_ t: String.Type, forKeys ks: [K]) throws -> String? {
-        for k in ks { if let v = try decodeIfPresent(t, forKey: k) { return v } }
-        return nil
-    }
-    func decodeIfPresent(_ t: Double.Type, forKeys ks: [K]) throws -> Double? {
-        for k in ks {
-            if let v = try decodeIfPresent(Double.self, forKey: k) { return v }
-            if let s = try decodeIfPresent(String.self, forKey: k), let v = Double(s) { return v }
-        }
-        return nil
-    }
-}
-private extension DamDTO {
-    func toModel() -> Dam? {
-        guard let id, let name, let latitude, let longitude else { return nil }
-        return Dam(id: id, name: name, latitude: latitude, longitude: longitude, region: region, storagePercent: nil)
-    }
+private struct DamsEnvelope: Decodable {
+    let dams: [Dam]
 }
