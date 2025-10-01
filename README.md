@@ -127,4 +127,4 @@ A lightweight iOS app to browse NSW dam information. Built with **SwiftUI, MVVM,
 - **Views**: `DamListView.swift`, `DamDetailView.swift`  
 - **Support**: `BuildFlags.swift`, `StubLoader.swift`  
 - **Persistence**: `FavoritesStore.swift` (local, no cloud)  
-- **Tests**: `NSWWaterTests` (unit tests only)
+- **Tests**: `DamResourceTests` (unit tests only)
