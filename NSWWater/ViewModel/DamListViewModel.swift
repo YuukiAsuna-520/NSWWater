@@ -7,13 +7,14 @@
 
 import Foundation
 import Combine
+import Collections
 
 final class DamListViewModel: ObservableObject {
 
     // MARK: - Search
     @Published var dams: [Dam] = StubLoader.loadDams()
     @Published var searchText: String = ""
-    @Published var latestByDam: [String: DamResource] = [:]
+    @Published var latestByDam = OrderedDictionary<String, DamResource>()
 
     var filtered: [Dam] {
         let q = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -54,6 +55,7 @@ final class DamListViewModel: ObservableObject {
 
     // MARK: - Throttle / cache
     private let latestTTL: TimeInterval = 5
+    private let latestCacheCap = 40
     private var latestFetchedAt: [String: Date] = [:]
     private var latestInFlight = Set<String>()
     private var globalCooldownUntil: Date?
@@ -187,16 +189,24 @@ final class DamListViewModel: ObservableObject {
     func loadLatest(for dam: Dam) async {
         guard shouldUseNetwork else { return }
 
-        if let t = latestFetchedAt[dam.id], now().timeIntervalSince(t) < latestTTL {
-            return
-        }
+        if let t = latestFetchedAt[dam.id], now().timeIntervalSince(t) < latestTTL { return }
         if latestInFlight.contains(dam.id) { return }
         latestInFlight.insert(dam.id)
         defer { latestInFlight.remove(dam.id) }
 
         do {
             if let latest = try await fetchLatestResource(damID: dam.id) {
+                
+                if latestByDam.keys.contains(dam.id) {
+                    latestByDam.removeValue(forKey: dam.id)
+                }
+                
                 latestByDam[dam.id] = latest
+
+                if latestByDam.count > latestCacheCap, let oldestKey = latestByDam.elements.first?.key {
+                    latestByDam.removeValue(forKey: oldestKey)
+                }
+
                 latestFetchedAt[dam.id] = now()
             }
         } catch {

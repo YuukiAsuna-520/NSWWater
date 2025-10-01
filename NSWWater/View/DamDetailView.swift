@@ -7,6 +7,7 @@
 
 import SwiftUI
 import MapKit
+import Collections
 
 struct DamDetailView: View {
     let dam: Dam

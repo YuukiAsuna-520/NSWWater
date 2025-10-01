@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		A32C6BBB2E8C72E7002ED46B /* OrderedCollections in Frameworks */ = {isa = PBXBuildFile; productRef = A32C6BBA2E8C72E7002ED46B /* OrderedCollections */; };
+		A32C6C002E8CDA27002ED46B /* Collections in Frameworks */ = {isa = PBXBuildFile; productRef = A32C6BFF2E8CDA27002ED46B /* Collections */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -43,6 +44,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A32C6C002E8CDA27002ED46B /* Collections in Frameworks */,
 				A32C6BBB2E8C72E7002ED46B /* OrderedCollections in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -96,6 +98,7 @@
 			name = NSWWater;
 			packageProductDependencies = (
 				A32C6BBA2E8C72E7002ED46B /* OrderedCollections */,
+				A32C6BFF2E8CDA27002ED46B /* Collections */,
 			);
 			productName = NSWWater;
 			productReference = A3D61BD72E891F5F00834943 /* NSWWater.app */;
@@ -486,6 +489,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = A32C6BB92E8C72B9002ED46B /* XCRemoteSwiftPackageReference "swift-collections" */;
 			productName = OrderedCollections;
+		};
+		A32C6BFF2E8CDA27002ED46B /* Collections */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A32C6BB92E8C72B9002ED46B /* XCRemoteSwiftPackageReference "swift-collections" */;
+			productName = Collections;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
