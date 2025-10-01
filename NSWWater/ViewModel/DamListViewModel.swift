@@ -90,6 +90,11 @@ final class DamListViewModel: ObservableObject {
     }
 
     // MARK: - GET (Raw Data)
+    private func isCancelledError(_ error: Error) -> Bool {
+        let ns = error as NSError
+        return ns.domain == NSURLErrorDomain && ns.code == NSURLErrorCancelled
+    }
+
     private func GETRaw(
         _ path: String,
         query: [URLQueryItem]? = nil,
@@ -189,97 +194,139 @@ final class DamListViewModel: ObservableObject {
     func loadLatest(for dam: Dam) async {
         guard shouldUseNetwork else { return }
 
-        if let t = latestFetchedAt[dam.id], now().timeIntervalSince(t) < latestTTL { return }
+        // per-dam TTL throttle
+        if let t = latestFetchedAt[dam.id], now().timeIntervalSince(t) < latestTTL {
+            return
+        }
+        // de-dup in-flight
         if latestInFlight.contains(dam.id) { return }
         latestInFlight.insert(dam.id)
         defer { latestInFlight.remove(dam.id) }
 
         do {
+            try Task.checkCancellation()
+
             if let latest = try await fetchLatestResource(damID: dam.id) {
-                
-                if latestByDam.keys.contains(dam.id) {
-                    latestByDam.removeValue(forKey: dam.id)
-                }
-                
                 latestByDam[dam.id] = latest
 
-                if latestByDam.count > latestCacheCap, let oldestKey = latestByDam.elements.first?.key {
-                    latestByDam.removeValue(forKey: oldestKey)
+                // Keep insertion order and trim to most recent 40 entries.
+                // Using OrderedDictionary: remove the oldest by first key.
+                if latestByDam.count > 40, let firstKey = latestByDam.keys.first {
+                    latestByDam.removeValue(forKey: firstKey)
                 }
 
                 latestFetchedAt[dam.id] = now()
             }
         } catch {
+            // Ignore benign cancellations (view disappeared, task replaced, etc.)
+            if isCancelledError(error) || Task.isCancelled { return }
             print("loadLatest failed for \(dam.id): \(error)")
         }
     }
 
     private func fetchLatestResource(damID: String) async throws -> DamResource? {
+        do {
+            let data = try await GETRaw("dams/\(damID)/resources/latest", requiresApiKey: true)
+            if data.isEmpty { return nil }
 
-        let data = try await GETRaw("dams/\(damID)/resources/latest", requiresApiKey: true)
+            if let r = tryParseLatest(from: data) {
+                return r
+            }
 
-        if data.isEmpty { return nil }
-
-        if let r = tryParseLatest(from: data) {
-            return r
+            // Unknown shape: log once and return nil (no UI error)
+            let body = String(data: data, encoding: .utf8) ?? "<non-utf8>"
+            print("❌ Unexpected JSON for /resources/latest dam=\(damID): \(body)")
+            return nil
+        } catch {
+            // If the underlying URLSession task was cancelled, treat as non-error.
+            if isCancelledError(error) { return nil }
+            throw error
         }
-
-        let body = String(data: data, encoding: .utf8) ?? "<non-utf8>"
-        print("❌ Unexpected JSON for /resources/latest dam=\(damID): \(body)")
-        return nil
     }
     
-    private func tryParseLatest(from data: Data) -> DamResource? {
-        
-        if let one = try? decoder.decode(DamResource.self, from: data) {
-            return one
-        }
-
-        struct ResourcesEnvelope: Decodable { let resources: [DamResource] }
-        if let env = try? decoder.decode(ResourcesEnvelope.self, from: data),
-           let last = env.resources.last {
-            return last
-        }
-
-        struct SingleResourceEnvelope: Decodable { let resource: DamResource?; let data: DamResource? }
-        if let env = try? decoder.decode(SingleResourceEnvelope.self, from: data) {
-            if let r = env.resource ?? env.data { return r }
-        }
-
-        if let any = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
-            
-            if let r = damResourceFromLooseDict(any) { return r }
-    
-            for (_, v) in any {
-                if let d = v as? [String: Any], let r = damResourceFromLooseDict(d) { return r }
-                if let arr = v as? [Any] {
-                    for e in arr {
-                        if let d = e as? [String: Any], let r = damResourceFromLooseDict(d) { return r }
-                    }
-                }
+    // Recursively search any JSON shape and return the first valid DamResource-ish object.
+    private func firstResourceInJSON(_ any: Any) -> DamResource? {
+        if let dict = any as? [String: Any] {
+            // If this dictionary itself looks like a resource, use it.
+            if let r = damResourceFromLooseDict(dict) { return r }
+            // Otherwise, dive into each value (handles "dams" -> item -> "resources" -> [ {...} ])
+            for (_, v) in dict {
+                if let nested = firstResourceInJSON(v) { return nested }
+            }
+        } else if let arr = any as? [Any] {
+            // Explore arrays (order matters: first usable object wins)
+            for e in arr {
+                if let nested = firstResourceInJSON(e) { return nested }
             }
         }
         return nil
     }
 
+    // It keeps your fast-path decodes, then falls back to deep recursive search.
+    private func tryParseLatest(from data: Data) -> DamResource? {
+        // 1) Try direct DamResource
+        if let one = try? decoder.decode(DamResource.self, from: data),
+           (one.percentFull != nil || one.volume != nil || one.inflow != nil || one.release != nil) {
+            return one
+        }
+
+        // 2) Try { "resources": [ ... ] }
+        struct ResourcesEnvelope: Decodable { let resources: [DamResource] }
+        if let env = try? decoder.decode(ResourcesEnvelope.self, from: data) {
+            if let lastGood = env.resources.reversed().first(where: {
+                $0.percentFull != nil || $0.volume != nil || $0.inflow != nil || $0.release != nil
+            }) {
+                return lastGood
+            }
+        }
+
+        // 3) Try { "resource": {...} } / { "data": {...} }
+        struct SingleResourceEnvelope: Decodable { let resource: DamResource?; let data: DamResource? }
+        if let env = try? decoder.decode(SingleResourceEnvelope.self, from: data) {
+            if let r = env.resource ?? env.data,
+               (r.percentFull != nil || r.volume != nil || r.inflow != nil || r.release != nil) {
+                return r
+            }
+        }
+
+        // 4) Fallback: deep recursive scan (handles "dams" -> item -> "resources" -> [ {...} ] and more)
+        if let any = try? JSONSerialization.jsonObject(with: data) {
+            if let r = firstResourceInJSON(any) { return r }
+        }
+
+        return nil
+    }
+
     private func damResourceFromLooseDict(_ d: [String: Any]) -> DamResource? {
-        func num(_ k: String) -> Double? {
-            if let v = d[k] as? Double { return v }
-            if let v = d[k] as? NSNumber { return v.doubleValue }
-            if let s = d[k] as? String, let v = Double(s) { return v }
+        func num(_ keys: [String]) -> Double? {
+            for k in keys {
+                if let v = d[k] as? Double { return v }
+                if let v = d[k] as? NSNumber { return v.doubleValue }
+                if let s = d[k] as? String, let v = Double(s) { return v }
+            }
             return nil
         }
-        let percent = num("percent_full")
-        let volume  = num("volume")
-        let inflow  = num("inflow")
-        let release = num("release")
+
+        let percent = num([
+            "percent_full", "percentage_full",
+            "accessible_storage_percentage", "accessible_storage_percent"
+        ])
+        let volume  = num([
+            "volume", "storage_volume",
+            "accessible_storage", "accessible_volume", "current_storage"
+        ])
+        let inflow  = num([
+            "inflow", "storage_inflow", "inflow_volume"
+        ])
+        let release = num([
+            "release", "storage_release", "release_volume", "outflow"
+        ])
 
         if percent != nil || volume != nil || inflow != nil || release != nil {
             return DamResource(percentFull: percent, volume: volume, inflow: inflow, release: release)
         }
         return nil
     }
-
 
     // MARK: - DTOs / Errors
     private struct AccessTokenResponse: Decodable { let access_token: String }
