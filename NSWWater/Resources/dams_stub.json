@@ -1,3 +1,12 @@
+//    • Demos & offline: works without Internet or API keys.
+//    • Tests & previews: stable inputs for unit tests and SwiftUI previews.
+
+//  When it’s used:
+//    • On first launch the ViewModel seeds `dams` from `StubLoader.loadDams()`.
+//    • If `BuildFlags.useNetwork == false`, or API credentials are missing/invalid,
+//      network fetch is skipped and the stub remains as the displayed data.
+//    • If a later network fetch succeeds, it *replaces* the stub in-memory.
+
 [
   { "dam_id": "WARRAGAMBA", "dam_name": "Warragamba Dam", "lat": -33.875, "long": 150.602, "percent_full": 83.2 },
   { "dam_id": "AVON",        "dam_name": "Avon Dam",       "lat": -34.296, "long": 150.623, "percent_full": 76.5 }
